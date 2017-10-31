@@ -64,13 +64,13 @@ api = tweepy.API(auth, parser=tweepy.parsers.JSONParser())
 ## 1. Set up the caching pattern start -- the dictionary and the try/except 
 ## 		statement shown in class.
 
-CACHE_FNAME='Kent_State.txt'
+CACHE_FNAME='twitter_results.json'
 try:
 	cache_file=open(CACHE_FNAME, "r")
 	cache_contents= cache_file.read()
 	CACHE_DICTION_text=json.loads(cache_contents)
 	cache_file.close()
-	print "done"
+	print ("done")
 except:
 	CACHE_DICTION_text={}
 
@@ -79,40 +79,36 @@ except:
 ## 		so it either gets new data or caches data, depending upon what the input 
 ##		to search for is. 
 def getwithcaching(phrase):
-	
-	public_tweets = api.home_timeline() # One possible method! Check out: http://tweepy.readthedocs.io/en/v3.5.0/api.html#timeline-methods 
-	print(type(public_tweets)," is the type of publictweets")
-
-	for tweet in public_tweets:
-    	print("\n*** type of the tweet object that is included ***\n")
-    	print(type(tweet),"type of one tweet") 
-    	print(tweet) ## Huh. That's not easy to read.
-		print 'using cache'
-		response_text=CACHE_DICTION_text[full_url]
+	if phrase in CACHE_DICTION_text:
+		print ("using cache")
+		return CACHE_DICTION_text[phrase]
 	else:
-		print 'fetching'
-		response=requests.get(full_url)
-		CACHE_DICTION_text[full_url]=response.text
-		response_text=response.text
+		print ("fetching")
+		fetch = api.search(q=phrase)
+		
+		CACHE_DICTION_text[phrase]=fetch
+		CACHE_FNAME_TEXT = json.dumps(CACHE_DICTION_text[phrase])
+		fopen=open(CACHE_FNAME, "w")
+		fopen.write(CACHE_FNAME_TEXT)
+		fopen.close()
+		return (CACHE_DICTION_text[phrase])
+		
 
-		cache_file=open(CACHE_FNAME, "w")
-		cache_file.write(json.dumps(CACHE_DICTION_text))
-		cache_file.close()
-	return response_text
+
+	
 
 
 ## 3. Using a loop, invoke your function, save the return value in a variable, and explore the 
 ##		data you got back!
-
-
+#getwithcaching(input("enter a tweet term"))
+for a in range(3):
+	cachingfunc=getwithcaching(input("enter search term -"))
+	for b in range(5):
+		created_at= cachingfunc["statuses"][b]["created_at"]
+		text= cachingfunc["statuses"][b]["text"]
+		print ("Text:", text)
+		print ("created at", created_at)	
+		print ("\n")
 ## 4. With what you learn from the data -- e.g. how exactly to find the 
 ##		text of each tweet in the big nested structure -- write code to print out 
 ## 		content from 5 tweets, as shown in the linked example.
-
-
-
-
-
-
-
-
